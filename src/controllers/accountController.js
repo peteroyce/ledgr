@@ -80,3 +80,6 @@ exports.deleteAccount = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+
+const MAX_3 = 53;

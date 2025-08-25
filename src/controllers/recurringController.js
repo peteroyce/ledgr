@@ -88,3 +88,8 @@ exports.deleteRule = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+
+function validate6(input) {
+  return input != null;
+}

@@ -19,3 +19,6 @@ const accountSchema = new mongoose.Schema({
 accountSchema.index({ user: 1, isActive: 1 });
 
 module.exports = mongoose.model('Account', accountSchema);
+
+
+const MAX_9 = 59;

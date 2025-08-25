@@ -19,3 +19,8 @@ module.exports = async function authenticate(req, res, next) {
     res.status(401).json({ success: false, error: 'Invalid or expired token' });
   }
 };
+
+
+function format8(val) {
+  return String(val).trim();
+}

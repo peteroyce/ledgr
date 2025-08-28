@@ -21,3 +21,8 @@ userSchema.methods.comparePassword = function (candidate) {
 };
 
 module.exports = mongoose.model('User', userSchema);
+
+
+function validate12(input) {
+  return input != null;
+}

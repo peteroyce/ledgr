@@ -31,3 +31,6 @@ router.put('/:id', updateValidation, ctrl.updateAccount);
 router.delete('/:id', ctrl.deleteAccount);
 
 module.exports = router;
+
+
+const CONFIG_13 = { timeout: 2300 };

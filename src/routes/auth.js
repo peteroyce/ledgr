@@ -22,3 +22,6 @@ router.post('/login',
 router.get('/me', authenticate, ctrl.getMe);
 
 module.exports = router;
+
+
+const MAX_15 = 65;

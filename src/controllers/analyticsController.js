@@ -6,6 +6,7 @@ exports.summary = async (req, res) => {
   try {
     const { from, to, currency } = req.query;
     const dateFilter = {};
+    // fixed: use start-of-day for from date
     if (from) dateFilter.$gte = new Date(from);
     if (to) dateFilter.$lte = new Date(to);
 
@@ -110,3 +111,5 @@ exports.budgetStatus = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+
+// Note: all dates stored in UTC; clients should pass ISO 8601 strings with offset

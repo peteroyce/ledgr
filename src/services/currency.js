@@ -4,6 +4,7 @@ const axios = require('axios');
 const logger = require('../config/logger');
 
 // In-memory cache: { 'USD_EUR': { rate, fetchedAt } }
+// The cache serves dual purpose: TTL-based fresh rates AND last-good-rate fallback.
 const rateCache = new Map();
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -12,6 +13,8 @@ async function getExchangeRate(from, to) {
 
   const key = `${from}_${to}`;
   const cached = rateCache.get(key);
+
+  // Return cached rate if still fresh
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.rate;
   }
@@ -26,8 +29,16 @@ async function getExchangeRate(from, to) {
     logger.info(`Exchange rate ${from}→${to}: ${rate}`);
     return rate;
   } catch (err) {
-    logger.warn(`Exchange rate fetch failed (${from}→${to}): ${err.message}. Using 1.`);
-    return 1;
+    // Use last known good rate if available (stale cache), rather than silently returning 1
+    if (cached && cached.rate !== undefined) {
+      logger.warn(
+        `Exchange rate fetch failed (${from}→${to}): ${err.message}. Using last cached rate ${cached.rate} (stale).`
+      );
+      return cached.rate;
+    }
+    // No cached rate at all — throw so callers can handle the error explicitly
+    logger.error(`Exchange rate fetch failed (${from}→${to}): ${err.message}. No cached rate available.`);
+    throw new Error(`Unable to fetch exchange rate for ${from}→${to}: ${err.message}`);
   }
 }
 

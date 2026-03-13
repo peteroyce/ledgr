@@ -13,9 +13,18 @@ exports.create = async (req, res) => {
   if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
   try {
-    const { accountId, type, amount, currency, category, tags, description, date } = req.body;
+    const { accountId, toAccountId, type, amount, currency, category, tags, description, date } = req.body;
     const account = await Account.findOne({ _id: accountId, user: req.user._id });
     if (!account) return res.status(404).json({ success: false, error: 'Account not found' });
+
+    // Transfers require a destination account
+    if (type === 'transfer') {
+      if (!toAccountId) {
+        return res.status(400).json({ success: false, error: 'toAccountId is required for transfers' });
+      }
+      const toAccount = await Account.findOne({ _id: toAccountId, user: req.user._id });
+      if (!toAccount) return res.status(404).json({ success: false, error: 'Destination account not found' });
+    }
 
     const baseCurrency = req.user.baseCurrency || 'USD';
     let amountInBase = amount;
@@ -26,14 +35,28 @@ exports.create = async (req, res) => {
       amountInBase = amount * exchangeRate;
     }
 
-    const tx = await Transaction.create({
-      user: req.user._id, account: accountId, type, amount, currency: currency || baseCurrency,
-      amountInBase, exchangeRate, category, tags, description, date,
-    });
+    const mongoose = require('mongoose');
+    const session = await mongoose.startSession();
+    let tx;
+    try {
+      await session.withTransaction(async () => {
+        [tx] = await Transaction.create([{
+          user: req.user._id, account: accountId, type, amount, currency: currency || baseCurrency,
+          amountInBase, exchangeRate, category, tags, description, date,
+        }], { session });
 
-    // Atomic balance update using $inc
-    const delta = type === 'income' ? amount : -amount;
-    await Account.findByIdAndUpdate(accountId, { $inc: { balance: delta } });
+        if (type === 'transfer') {
+          // Debit source, credit destination
+          await Account.findByIdAndUpdate(accountId, { $inc: { balance: -amount } }, { session });
+          await Account.findByIdAndUpdate(toAccountId, { $inc: { balance: amount } }, { session });
+        } else {
+          const delta = type === 'income' ? amount : -amount;
+          await Account.findByIdAndUpdate(accountId, { $inc: { balance: delta } }, { session });
+        }
+      });
+    } finally {
+      await session.endSession();
+    }
 
     res.status(201).json({ success: true, transaction: tx });
   } catch (err) {
@@ -109,12 +132,30 @@ exports.update = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    const tx = await Transaction.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    const mongoose = require('mongoose');
+    const session = await mongoose.startSession();
+    let tx;
+    try {
+      await session.withTransaction(async () => {
+        tx = await Transaction.findOneAndDelete({ _id: req.params.id, user: req.user._id }, { session });
+        if (!tx) return; // handled below after session
+
+        if (tx.type === 'transfer') {
+          // Reverse the transfer: credit source back, debit destination back
+          await Account.findByIdAndUpdate(tx.account, { $inc: { balance: tx.amount } }, { session });
+          if (tx.toAccount) {
+            await Account.findByIdAndUpdate(tx.toAccount, { $inc: { balance: -tx.amount } }, { session });
+          }
+        } else {
+          const delta = tx.type === 'income' ? -tx.amount : tx.amount;
+          await Account.findByIdAndUpdate(tx.account, { $inc: { balance: delta } }, { session });
+        }
+      });
+    } finally {
+      await session.endSession();
+    }
+
     if (!tx) return res.status(404).json({ success: false, error: 'Transaction not found' });
-
-    const delta = tx.type === 'income' ? -tx.amount : tx.amount;
-    await Account.findByIdAndUpdate(tx.account, { $inc: { balance: delta } });
-
     res.json({ success: true, message: 'Transaction deleted' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

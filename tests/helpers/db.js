@@ -1,20 +1,20 @@
 'use strict';
 
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const { MongoMemoryReplSet } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 
-let mongoServer;
+let replSet;
 
 async function connect() {
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
+  replSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
+  const uri = replSet.getUri();
   await mongoose.connect(uri);
 }
 
 async function disconnect() {
   await mongoose.connection.dropDatabase();
   await mongoose.connection.close();
-  if (mongoServer) await mongoServer.stop();
+  if (replSet) await replSet.stop();
 }
 
 async function clearCollections() {

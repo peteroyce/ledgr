@@ -10,6 +10,8 @@ const logger = require('./config/logger');
 const authRoutes = require('./routes/auth');
 const transactionRoutes = require('./routes/transactions');
 const analyticsRoutes = require('./routes/analytics');
+const accountRoutes = require('./routes/accounts');
+const recurringRoutes = require('./routes/recurring');
 const { schedulerInit } = require('./services/scheduler');
 
 // ── JWT_SECRET validation ───────────────────────────────────────────────────
@@ -51,6 +53,8 @@ const transactionLimiter = rateLimit({
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/transactions', transactionLimiter, transactionRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/accounts', accountRoutes);
+app.use('/api/recurring', recurringRoutes);
 
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', timestamp: new Date().toISOString() })

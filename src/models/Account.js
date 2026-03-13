@@ -10,7 +10,7 @@ const accountSchema = new mongoose.Schema({
     enum: ['checking', 'savings', 'credit', 'investment', 'cash'],
     required: true,
   },
-  currency: { type: String, uppercase: true, default: 'USD', length: 3 },
+  currency: { type: String, uppercase: true, default: 'USD', minlength: 3, maxlength: 3 },
   balance: { type: Number, default: 0 },
   institution: { type: String, trim: true },
   isActive: { type: Boolean, default: true },

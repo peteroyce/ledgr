@@ -1,14 +1,32 @@
 'use strict';
 
+const { validationResult } = require('express-validator');
 const Transaction = require('../models/Transaction');
 
+function parseDateParam(val) {
+  if (!val) return undefined;
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return null; // invalid
+  return d;
+}
+
 exports.summary = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const { from, to, currency } = req.query;
     const dateFilter = {};
-    // fixed: use start-of-day for from date
-    if (from) dateFilter.$gte = new Date(from);
-    if (to) dateFilter.$lte = new Date(to);
+    if (from) {
+      const d = parseDateParam(from);
+      if (!d) return res.status(400).json({ success: false, error: 'Invalid date: from' });
+      dateFilter.$gte = d;
+    }
+    if (to) {
+      const d = parseDateParam(to);
+      if (!d) return res.status(400).json({ success: false, error: 'Invalid date: to' });
+      dateFilter.$lte = d;
+    }
 
     const match = { user: req.user._id };
     if (Object.keys(dateFilter).length) match.date = dateFilter;
@@ -44,13 +62,24 @@ exports.summary = async (req, res) => {
 };
 
 exports.byCategory = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const { from, to, type = 'expense' } = req.query;
     const match = { user: req.user._id, type };
     if (from || to) {
       match.date = {};
-      if (from) match.date.$gte = new Date(from);
-      if (to) match.date.$lte = new Date(to);
+      if (from) {
+        const d = parseDateParam(from);
+        if (!d) return res.status(400).json({ success: false, error: 'Invalid date: from' });
+        match.date.$gte = d;
+      }
+      if (to) {
+        const d = parseDateParam(to);
+        if (!d) return res.status(400).json({ success: false, error: 'Invalid date: to' });
+        match.date.$lte = d;
+      }
     }
 
     const breakdown = await Transaction.aggregate([

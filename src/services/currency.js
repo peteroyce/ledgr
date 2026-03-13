@@ -22,7 +22,8 @@ async function getExchangeRate(from, to) {
   try {
     const apiKey = process.env.EXCHANGE_RATE_API_KEY;
     const { data } = await axios.get(
-      `https://v6.exchangerate-api.com/v6/${apiKey}/pair/${from}/${to}`
+      `https://v6.exchangerate-api.com/v6/${apiKey}/pair/${from}/${to}`,
+      { timeout: 5000 }
     );
     const rate = data.conversion_rate;
     rateCache.set(key, { rate, fetchedAt: Date.now() });

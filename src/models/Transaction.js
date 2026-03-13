@@ -7,7 +7,7 @@ const transactionSchema = new mongoose.Schema({
   account: { type: mongoose.Schema.Types.ObjectId, ref: 'Account', required: true },
   type: { type: String, enum: ['income', 'expense', 'transfer'], required: true },
   amount: { type: Number, required: true },
-  currency: { type: String, uppercase: true, default: 'USD', length: 3 },
+  currency: { type: String, uppercase: true, default: 'USD', minlength: 3, maxlength: 3 },
   amountInBase: { type: Number }, // converted to user's base currency
   exchangeRate: { type: Number, default: 1 },
   category: { type: String, trim: true, default: 'Uncategorized' },

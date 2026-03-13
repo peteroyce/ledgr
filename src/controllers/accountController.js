@@ -26,7 +26,7 @@ exports.createAccount = async (req, res) => {
 exports.getAccounts = async (req, res) => {
   try {
     const accounts = await Account.find({ user: req.user._id, isActive: true }).sort({ createdAt: -1 });
-    res.json({ success: true, data: accounts });
+    res.json({ success: true, accounts });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

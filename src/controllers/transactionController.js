@@ -41,7 +41,7 @@ exports.create = async (req, res) => {
     try {
       await session.withTransaction(async () => {
         [tx] = await Transaction.create([{
-          user: req.user._id, account: accountId, type, amount, currency: currency || baseCurrency,
+          user: req.user._id, account: accountId, toAccount: toAccountId || undefined, type, amount, currency: currency || baseCurrency,
           amountInBase, exchangeRate, category, tags, description, date,
         }], { session });
 

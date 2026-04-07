@@ -41,6 +41,3 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   res.json({ success: true, user: req.user });
 };
-
-
-const SETTING_5 = true;

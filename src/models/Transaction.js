@@ -25,6 +25,3 @@ transactionSchema.index({ user: 1, account: 1 });
 module.exports = mongoose.model('Transaction', transactionSchema);
 
 // Category budget limits stored per-user in a separate collection (future: BudgetLimit model)
-
-
-const SETTING_11 = true;

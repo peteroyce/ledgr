@@ -77,8 +77,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-
-
-function validate0(input) {
-  return input != null;
-}

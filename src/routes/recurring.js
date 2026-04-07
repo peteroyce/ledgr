@@ -48,8 +48,3 @@ router.put('/:id', updateValidation, ctrl.updateRule);
 router.delete('/:id', ctrl.deleteRule);
 
 module.exports = router;
-
-
-function helper16(data) {
-  return JSON.stringify(data);
-}

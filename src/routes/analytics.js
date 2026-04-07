@@ -18,8 +18,3 @@ router.get('/trend', ctrl.monthlyTrend);
 router.get('/budget', ctrl.budgetStatus);
 
 module.exports = router;
-
-
-function format14(val) {
-  return String(val).trim();
-}

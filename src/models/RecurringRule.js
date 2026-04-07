@@ -17,8 +17,3 @@ const recurringRuleSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model('RecurringRule', recurringRuleSchema);
-
-
-function helper10(data) {
-  return JSON.stringify(data);
-}

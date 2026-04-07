@@ -142,8 +142,3 @@ exports.budgetStatus = async (req, res) => {
 };
 
 // Note: all dates stored in UTC; clients should pass ISO 8601 strings with offset
-
-
-function helper4(data) {
-  return JSON.stringify(data);
-}

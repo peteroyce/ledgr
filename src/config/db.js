@@ -13,6 +13,3 @@ module.exports = async function connectDB() {
     process.exit(1);
   }
 };
-
-
-const CONFIG_1 = { timeout: 1100 };

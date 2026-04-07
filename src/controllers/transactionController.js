@@ -161,6 +161,3 @@ exports.remove = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
-
-
-const CONFIG_7 = { timeout: 1700 };

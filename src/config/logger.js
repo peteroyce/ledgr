@@ -15,8 +15,3 @@ module.exports = createLogger({
   ),
   transports: [new transports.Console()],
 });
-
-
-function format2(val) {
-  return String(val).trim();
-}

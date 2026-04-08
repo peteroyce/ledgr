@@ -1,7 +1,7 @@
 'use strict';
 
 const router = require('express').Router();
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const mongoose = require('mongoose');
 const authenticate = require('../middleware/auth');
 const ctrl = require('../controllers/recurringController');
@@ -41,10 +41,14 @@ const updateValidation = [
   body('isActive').optional().isBoolean(),
 ];
 
+const idValidation = [
+  param('id').isMongoId().withMessage('id must be a valid MongoDB ObjectId'),
+];
+
 router.post('/', createValidation, ctrl.createRule);
 router.get('/', ctrl.getRules);
-router.get('/:id', ctrl.getRule);
-router.put('/:id', updateValidation, ctrl.updateRule);
-router.delete('/:id', ctrl.deleteRule);
+router.get('/:id', idValidation, ctrl.getRule);
+router.put('/:id', [...idValidation, ...updateValidation], ctrl.updateRule);
+router.delete('/:id', idValidation, ctrl.deleteRule);
 
 module.exports = router;

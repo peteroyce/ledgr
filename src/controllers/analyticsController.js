@@ -96,6 +96,9 @@ exports.byCategory = async (req, res) => {
 };
 
 exports.monthlyTrend = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const { months = 6 } = req.query;
     const from = new Date();
@@ -119,6 +122,9 @@ exports.monthlyTrend = async (req, res) => {
 };
 
 exports.budgetStatus = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const { month, year } = req.query;
     const now = new Date();

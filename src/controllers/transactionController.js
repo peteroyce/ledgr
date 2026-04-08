@@ -96,6 +96,9 @@ exports.list = async (req, res) => {
 };
 
 exports.getOne = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const tx = await Transaction.findOne({ _id: req.params.id, user: req.user._id }).populate('account', 'name currency');
     if (!tx) return res.status(404).json({ success: false, error: 'Transaction not found' });
@@ -131,6 +134,9 @@ exports.update = async (req, res) => {
 };
 
 exports.remove = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const mongoose = require('mongoose');
     const session = await mongoose.startSession();

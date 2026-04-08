@@ -44,6 +44,9 @@ exports.getRules = async (req, res) => {
 };
 
 exports.getRule = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const rule = await RecurringRule.findOne({ _id: req.params.id, user: req.user._id })
       .populate('account', 'name currency');
@@ -80,6 +83,9 @@ exports.updateRule = async (req, res) => {
 };
 
 exports.deleteRule = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const rule = await RecurringRule.findOneAndDelete({ _id: req.params.id, user: req.user._id });
     if (!rule) return res.status(404).json({ success: false, error: 'Recurring rule not found' });

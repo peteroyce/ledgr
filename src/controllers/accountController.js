@@ -33,6 +33,9 @@ exports.getAccounts = async (req, res) => {
 };
 
 exports.getAccount = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const account = await Account.findOne({ _id: req.params.id, user: req.user._id });
     if (!account) return res.status(404).json({ success: false, error: 'Account not found' });
@@ -68,6 +71,9 @@ exports.updateAccount = async (req, res) => {
 };
 
 exports.deleteAccount = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
     const account = await Account.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
